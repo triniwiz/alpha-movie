@@ -45,7 +45,7 @@ public class AlphaMovieView extends GLTextureView {
 
     private static final float VIEW_ASPECT_RATIO = 4f / 3f;
     private float videoAspectRatio = VIEW_ASPECT_RATIO;
-
+    private boolean useAspect = true;
     VideoRenderer renderer;
     private MediaPlayer mediaPlayer;
 
@@ -83,7 +83,8 @@ public class AlphaMovieView extends GLTextureView {
         setOpaque(false);
     }
 
-    private void initMediaPlayer() {
+    public void initMediaPlayer() {
+        state = PlayerState.NOT_PREPARED;
         mediaPlayer = new MediaPlayer();
         setScreenOnWhilePlaying(true);
         setLooping(true);
@@ -97,6 +98,18 @@ public class AlphaMovieView extends GLTextureView {
                 }
             }
         });
+    }
+
+    public void setAlphaColor(int alphaColor) {
+        renderer.setAlphaColor(alphaColor);
+    }
+
+    public void setShader(String shader) {
+        renderer.setCustomShader(shader);
+    }
+
+    public void setAccuracy(float accuracy) {
+        renderer.setAccuracy(accuracy);
     }
 
     private void obtainRendererOptions(AttributeSet attrs) {
@@ -152,8 +165,16 @@ public class AlphaMovieView extends GLTextureView {
         invalidate();
     }
 
+    public void toggleUseAspect(boolean toggle) {
+        useAspect = toggle;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (!useAspect) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -361,6 +382,7 @@ public class AlphaMovieView extends GLTextureView {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             state = PlayerState.RELEASE;
+            mediaPlayer = null;
         }
     }
 
@@ -400,7 +422,7 @@ public class AlphaMovieView extends GLTextureView {
         mediaPlayer.setScreenOnWhilePlaying(screenOn);
     }
 
-    public void setOnErrorListener(MediaPlayer.OnErrorListener onErrorListener){
+    public void setOnErrorListener(MediaPlayer.OnErrorListener onErrorListener) {
         mediaPlayer.setOnErrorListener(onErrorListener);
     }
 
